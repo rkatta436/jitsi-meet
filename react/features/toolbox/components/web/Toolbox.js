@@ -11,7 +11,6 @@ import {
 import { openDialog, toggleDialog } from '../../../base/dialog';
 import { translate } from '../../../base/i18n';
 import {
-    IconChat,
     IconExitFullScreen,
     IconFeedback,
     IconFullScreen,
@@ -32,7 +31,6 @@ import { connect, equals } from '../../../base/redux';
 import { OverflowMenuItem } from '../../../base/toolbox';
 import { getLocalVideoTrack, toggleScreensharing } from '../../../base/tracks';
 import { VideoBlurButton } from '../../../blur';
-import { ChatCounter, toggleChat } from '../../../chat';
 import { SharedDocumentButton } from '../../../etherpad';
 import { openFeedbackDialog } from '../../../feedback';
 import {
@@ -89,11 +87,6 @@ import {
  * The type of the React {@code Component} props of {@link Toolbox}.
  */
 type Props = {
-
-    /**
-     * Whether or not the chat feature is currently displayed.
-     */
-    _chatOpen: boolean,
 
     /**
      * The {@code JitsiConference} for the current conference.
@@ -269,11 +262,6 @@ class Toolbox extends Component<Props, State> {
                 exec: this._onShortcutToggleVideoQuality,
                 helpDescription: 'keyboardShortcuts.videoQuality'
             },
-            this._shouldShowButton('chat') && {
-                character: 'C',
-                exec: this._onShortcutToggleChat,
-                helpDescription: 'keyboardShortcuts.toggleChat'
-            },
             this._shouldShowButton('desktop') && {
                 character: 'D',
                 exec: this._onShortcutToggleScreenshare,
@@ -406,16 +394,6 @@ class Toolbox extends Component<Props, State> {
      */
     _doOpenVideoQuality() {
         this.props.dispatch(openDialog(VideoQualityDialog));
-    }
-
-    /**
-     * Dispatches an action to toggle the display of chat.
-     *
-     * @private
-     * @returns {void}
-     */
-    _doToggleChat() {
-        this.props.dispatch(toggleChat());
     }
 
     /**
@@ -573,10 +551,8 @@ class Toolbox extends Component<Props, State> {
         sendAnalytics(createShortcutEvent(
             'toggle.chat',
             {
-                enable: !this.props._chatOpen
+                enable: false
             }));
-
-        this._doToggleChat();
     }
 
     _onShortcutToggleVideoQuality: () => void;
@@ -755,10 +731,8 @@ class Toolbox extends Component<Props, State> {
         sendAnalytics(createToolbarEvent(
             'toggle.chat',
             {
-                enable: !this.props._chatOpen
+                enable: false
             }));
-
-        this._doToggleChat();
     }
 
     _onToolbarToggleFullScreen: () => void;
@@ -1048,7 +1022,6 @@ class Toolbox extends Component<Props, State> {
      */
     _renderMovedButtons(movedButtons) {
         const {
-            _chatOpen,
             _raisedHand,
             t
         } = this.props;
@@ -1069,20 +1042,6 @@ class Toolbox extends Component<Props, State> {
                             t(`toolbar.${
                                 _raisedHand
                                     ? 'lowerYourHand' : 'raiseYourHand'}`
-                            )
-                        } />
-                );
-            case 'chat':
-                return (
-                    <OverflowMenuItem
-                        accessibilityLabel =
-                            { t('toolbar.accessibilityLabel.chat') }
-                        icon = { IconChat }
-                        key = 'chat'
-                        onClick = { this._onToolbarToggleChat }
-                        text = {
-                            t(`toolbar.${
-                                _chatOpen ? 'closeChat' : 'openChat'}`
                             )
                         } />
                 );
@@ -1123,7 +1082,6 @@ class Toolbox extends Component<Props, State> {
      */
     _renderToolboxContent() {
         const {
-            _chatOpen,
             _hideInviteButton,
             _overflowMenuVisible,
             _raisedHand,
@@ -1218,16 +1176,6 @@ class Toolbox extends Component<Props, State> {
                             onClick = { this._onToolbarToggleRaiseHand }
                             toggled = { _raisedHand }
                             tooltip = { t('toolbar.raiseHand') } /> }
-                    { buttonsLeft.indexOf('chat') !== -1
-                        && <div className = 'toolbar-button-with-badge'>
-                            <ToolbarButton
-                                accessibilityLabel = { t('toolbar.accessibilityLabel.chat') }
-                                icon = { IconChat }
-                                onClick = { this._onToolbarToggleChat }
-                                toggled = { _chatOpen }
-                                tooltip = { t('toolbar.chat') } />
-                            <ChatCounter />
-                        </div> }
                     {
                         buttonsLeft.indexOf('closedcaptions') !== -1
                             && <ClosedCaptionButton />
@@ -1340,7 +1288,6 @@ function _mapStateToProps(state) {
     const buttons = new Set(interfaceConfig.TOOLBAR_BUTTONS);
 
     return {
-        _chatOpen: state['features/chat'].isOpen,
         _conference: conference,
         _desktopSharingEnabled: desktopSharingEnabled,
         _desktopSharingDisabledTooltipKey: desktopSharingDisabledTooltipKey,

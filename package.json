@@ -140,7 +140,8 @@
   "scripts": {
     "lint": "eslint . && flow",
     "postinstall": "jetify",
-    "validate": "npm ls"
+    "validate": "npm ls",
+    "ios": "react-native run-ios"
   },
   "pre-commit": [
     "lint"
