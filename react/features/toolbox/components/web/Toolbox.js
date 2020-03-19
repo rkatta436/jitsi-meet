@@ -11,28 +11,25 @@ import {
 import { openDialog, toggleDialog } from '../../../base/dialog';
 import { translate } from '../../../base/i18n';
 import {
-    IconChat,
     IconExitFullScreen,
     IconFeedback,
     IconFullScreen,
     IconInvite,
     IconOpenInNew,
     IconPresentation,
-    IconRaisedHand,
     IconRec,
     IconShareDesktop,
     IconShareVideo
 } from '../../../base/icons';
 import {
     getLocalParticipant,
-    getParticipants,
-    participantUpdated
+    getParticipants
 } from '../../../base/participants';
 import { connect } from '../../../base/redux';
 import { OverflowMenuItem } from '../../../base/toolbox';
 import { getLocalVideoTrack, toggleScreensharing } from '../../../base/tracks';
 import { VideoBlurButton } from '../../../blur';
-import { ChatCounter, toggleChat } from '../../../chat';
+import { toggleChat } from '../../../chat';
 import { SharedDocumentButton } from '../../../etherpad';
 import { openFeedbackDialog } from '../../../feedback';
 import {
@@ -43,7 +40,6 @@ import {
 } from '../../../invite';
 import { openKeyboardShortcutsDialog } from '../../../keyboard-shortcuts';
 import {
-    LocalRecordingButton,
     LocalRecordingInfoDialog
 } from '../../../local-recording';
 import {
@@ -85,11 +81,6 @@ import {
  * The type of the React {@code Component} props of {@link Toolbox}.
  */
 type Props = {
-
-    /**
-     * Whether or not the chat feature is currently displayed.
-     */
-    _chatOpen: boolean,
 
     /**
      * The {@code JitsiConference} for the current conference.
@@ -147,11 +138,6 @@ type Props = {
      * Whether or not the overflow menu is visible.
      */
     _overflowMenuVisible: boolean,
-
-    /**
-     * Whether or not the local participant's hand is raised.
-     */
-    _raisedHand: boolean,
 
     /**
      * Whether or not the local participant is screensharing.
@@ -422,28 +408,6 @@ class Toolbox extends Component<Props, State> {
     }
 
     /**
-     * Dispatches an action to toggle the local participant's raised hand state.
-     *
-     * @private
-     * @returns {void}
-     */
-    _doToggleRaiseHand() {
-        const { _localParticipantID, _raisedHand } = this.props;
-
-        this.props.dispatch(participantUpdated({
-            // XXX Only the local participant is allowed to update without
-            // stating the JitsiConference instance (i.e. participant property
-            // `conference` for a remote participant) because the local
-            // participant is uniquely identified by the very fact that there is
-            // only one local participant.
-
-            id: _localParticipantID,
-            local: true,
-            raisedHand: !_raisedHand
-        }));
-    }
-
-    /**
      * Dispatches an action to toggle screensharing.
      *
      * @private
@@ -544,7 +508,7 @@ class Toolbox extends Component<Props, State> {
         sendAnalytics(createShortcutEvent(
             'toggle.chat',
             {
-                enable: !this.props._chatOpen
+                enable: false
             }));
 
         this._doToggleChat();
@@ -597,9 +561,8 @@ class Toolbox extends Component<Props, State> {
         sendAnalytics(createShortcutEvent(
             'toggle.raise.hand',
             ACTION_SHORTCUT_TRIGGERED,
-            { enable: !this.props._raisedHand }));
+            { enable: false }));
 
-        this._doToggleRaiseHand();
     }
 
     _onShortcutToggleScreenshare: () => void;
@@ -708,7 +671,7 @@ class Toolbox extends Component<Props, State> {
         sendAnalytics(createToolbarEvent(
             'toggle.chat',
             {
-                enable: !this.props._chatOpen
+                enable: false
             }));
 
         this._doToggleChat();
@@ -760,9 +723,8 @@ class Toolbox extends Component<Props, State> {
     _onToolbarToggleRaiseHand() {
         sendAnalytics(createToolbarEvent(
             'raise.hand',
-            { enable: !this.props._raisedHand }));
+            { enable: false }));
 
-        this._doToggleRaiseHand();
     }
 
     _onToolbarToggleScreenshare: () => void;
@@ -997,8 +959,6 @@ class Toolbox extends Component<Props, State> {
      */
     _renderMovedButtons(movedButtons) {
         const {
-            _chatOpen,
-            _raisedHand,
             t
         } = this.props;
 
@@ -1006,35 +966,6 @@ class Toolbox extends Component<Props, State> {
             switch (buttonName) {
             case 'desktop':
                 return this._renderDesktopSharingButton(true);
-            case 'raisehand':
-                return (
-                    <OverflowMenuItem
-                        accessibilityLabel =
-                            { t('toolbar.accessibilityLabel.raiseHand') }
-                        icon = { IconRaisedHand }
-                        key = 'raisedHand'
-                        onClick = { this._onToolbarToggleRaiseHand }
-                        text = {
-                            t(`toolbar.${
-                                _raisedHand
-                                    ? 'lowerYourHand' : 'raiseYourHand'}`
-                            )
-                        } />
-                );
-            case 'chat':
-                return (
-                    <OverflowMenuItem
-                        accessibilityLabel =
-                            { t('toolbar.accessibilityLabel.chat') }
-                        icon = { IconChat }
-                        key = 'chat'
-                        onClick = { this._onToolbarToggleChat }
-                        text = {
-                            t(`toolbar.${
-                                _chatOpen ? 'closeChat' : 'openChat'}`
-                            )
-                        } />
-                );
             case 'closedcaptions':
                 return <ClosedCaptionButton showLabel = { true } />;
             case 'info':
@@ -1072,10 +1003,8 @@ class Toolbox extends Component<Props, State> {
      */
     _renderToolboxContent() {
         const {
-            _chatOpen,
             _hideInviteButton,
             _overflowMenuVisible,
-            _raisedHand,
             t
         } = this.props;
         const overflowMenuContent = this._renderOverflowMenuContent();
@@ -1160,27 +1089,6 @@ class Toolbox extends Component<Props, State> {
                 <div className = 'button-group-left'>
                     { buttonsLeft.indexOf('desktop') !== -1
                         && this._renderDesktopSharingButton() }
-                    { buttonsLeft.indexOf('raisehand') !== -1
-                        && <ToolbarButton
-                            accessibilityLabel = { t('toolbar.accessibilityLabel.raiseHand') }
-                            icon = { IconRaisedHand }
-                            onClick = { this._onToolbarToggleRaiseHand }
-                            toggled = { _raisedHand }
-                            tooltip = { t('toolbar.raiseHand') } /> }
-                    { buttonsLeft.indexOf('chat') !== -1
-                        && <div className = 'toolbar-button-with-badge'>
-                            <ToolbarButton
-                                accessibilityLabel = { t('toolbar.accessibilityLabel.chat') }
-                                icon = { IconChat }
-                                onClick = { this._onToolbarToggleChat }
-                                toggled = { _chatOpen }
-                                tooltip = { t('toolbar.chat') } />
-                            <ChatCounter />
-                        </div> }
-                    {
-                        buttonsLeft.indexOf('closedcaptions') !== -1
-                            && <ClosedCaptionButton />
-                    }
                 </div>
                 <div className = 'button-group-center'>
                     <AudioMuteButton
@@ -1191,21 +1099,8 @@ class Toolbox extends Component<Props, State> {
                         visible = { this._shouldShowButton('camera') } />
                 </div>
                 <div className = 'button-group-right'>
-                    { buttonsRight.indexOf('localrecording') !== -1
-                        && <LocalRecordingButton
-                            onClick = {
-                                this._onToolbarOpenLocalRecordingInfoDialog
-                            } />
-                    }
                     { buttonsRight.indexOf('tileview') !== -1
                         && <TileViewButton /> }
-                    { buttonsRight.indexOf('invite') !== -1
-                        && <ToolbarButton
-                            accessibilityLabel =
-                                { t('toolbar.accessibilityLabel.invite') }
-                            icon = { IconInvite }
-                            onClick = { this._onToolbarOpenInvite }
-                            tooltip = { t('toolbar.invite') } /> }
                     {
                         buttonsRight.indexOf('info') !== -1
                             && <InfoDialogButton />
@@ -1285,7 +1180,6 @@ function _mapStateToProps(state) {
     }
 
     return {
-        _chatOpen: state['features/chat'].isOpen,
         _conference: conference,
         _desktopSharingEnabled: desktopSharingEnabled,
         _desktopSharingDisabledTooltipKey: desktopSharingDisabledTooltipKey,
@@ -1298,7 +1192,6 @@ function _mapStateToProps(state) {
         _localParticipantID: localParticipant.id,
         _localRecState: localRecordingStates,
         _overflowMenuVisible: overflowMenuVisible,
-        _raisedHand: localParticipant.raisedHand,
         _screensharing: localVideo && localVideo.videoType === 'desktop',
         _sharingVideo: sharedVideoStatus === 'playing'
             || sharedVideoStatus === 'start'

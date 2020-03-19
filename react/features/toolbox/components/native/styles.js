@@ -64,7 +64,8 @@ const styles = {
         flexGrow: 0,
         justifyContent: 'center',
         marginBottom: BoxModel.margin / 2,
-        paddingHorizontal: BoxModel.margin
+        paddingHorizontal: BoxModel.margin,
+        marginLeft: 50
     },
 
     /**

@@ -11,14 +11,10 @@ import { StyleType } from '../../../base/styles';
 import { SharedDocumentButton } from '../../../etherpad';
 import { InfoDialogButton, InviteButton } from '../../../invite';
 import { AudioRouteButton } from '../../../mobile/audio-mode';
-import { LiveStreamButton, RecordButton } from '../../../recording';
-import { RoomLockButton } from '../../../room-lock';
-import { ClosedCaptionButton } from '../../../subtitles';
 import { TileViewButton } from '../../../video-layout';
 
 import AudioOnlyButton from './AudioOnlyButton';
 import HelpButton from '../HelpButton';
-import RaiseHandButton from './RaiseHandButton';
 import ToggleCameraButton from './ToggleCameraButton';
 
 /**
@@ -96,20 +92,12 @@ class OverflowMenu extends Component<Props> {
                 <AudioRouteButton { ...buttonProps } />
                 <ToggleCameraButton { ...buttonProps } />
                 <AudioOnlyButton { ...buttonProps } />
-                <RoomLockButton { ...buttonProps } />
-                <ClosedCaptionButton { ...buttonProps } />
-                {
-                    this.props._recordingEnabled
-                        && <RecordButton { ...buttonProps } />
-                }
-                <LiveStreamButton { ...buttonProps } />
                 <TileViewButton { ...buttonProps } />
                 <InviteButton { ...buttonProps } />
                 {
                     this.props._chatEnabled
                         && <InfoDialogButton { ...buttonProps } />
                 }
-                <RaiseHandButton { ...buttonProps } />
                 <SharedDocumentButton { ...buttonProps } />
                 <HelpButton { ...buttonProps } />
             </BottomSheet>

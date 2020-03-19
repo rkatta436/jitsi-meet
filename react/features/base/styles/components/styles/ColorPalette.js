@@ -1,7 +1,7 @@
 /**
  * The application's definition of the default color black.
  */
-const BLACK = '#111111';
+const BLACK = '#dcdee0';
 
 /**
  * The application's color palette.
@@ -19,8 +19,8 @@ export const ColorPalette = {
      */
     black: BLACK,
     blackBlue: 'rgb(0, 3, 6)',
-    blue: '#17A0DB',
-    blueHighlight: '#1081b2',
+    blue: '#2d124b', // default 17A0DB
+    blueHighlight: '#502878', // default 1081b2
     buttonUnderlay: '#495258',
     darkGrey: '#555555',
     green: '#40b183',
